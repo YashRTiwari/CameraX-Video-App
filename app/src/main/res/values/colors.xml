@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#6200EE</color>
+    <color name="colorPrimaryDark">#3700B3</color>
+    <color name="colorAccent">#03DAC5</color>
+    <color name="toggle_button_pressed">#FF1100</color>
+    <color name="toggle_button_checked">#BA342B</color>
+    <color name="toggle_button_unchecked">#DDD7D7</color>
+    <color name="toggle_button_shadow">#F8F8F8</color>
+    <color name="toggle_button_unpressed">#B7ADAC</color>
+</resources>
