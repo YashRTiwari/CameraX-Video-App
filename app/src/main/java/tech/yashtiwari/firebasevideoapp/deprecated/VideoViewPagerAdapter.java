@@ -1,4 +1,4 @@
-package tech.yashtiwari.firebasevideoapp.adapter;
+package tech.yashtiwari.firebasevideoapp.deprecated;
 
 import android.content.Context;
 import android.net.Uri;

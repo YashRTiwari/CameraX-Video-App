@@ -16,9 +16,11 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.ListResult;
 import com.google.firebase.storage.StorageReference;
 
+import tech.yashtiwari.firebasevideoapp.Application;
 import tech.yashtiwari.firebasevideoapp.R;
 import tech.yashtiwari.firebasevideoapp.adapter.VideoViewPagerAdapter2;
 import tech.yashtiwari.firebasevideoapp.databinding.FragmentVideoStackBinding;
+import tech.yashtiwari.firebasevideoapp.event.Events;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -39,8 +41,7 @@ public class VideoStackFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_video_stack, container, false);
-        binding.videoFrame.setAdapter(new VideoViewPagerAdapter2(getActivity()));
-        getAllFilesInFirebase();
+        binding.videoFrame.setAdapter(new VideoViewPagerAdapter2(getActivity().getSupportFragmentManager(), getLifecycle()));
         return binding.getRoot();
     }
 
@@ -71,6 +72,29 @@ public class VideoStackFragment extends Fragment {
                     // Uh-oh, an error occurred!
                     e.printStackTrace();
                 });
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d(TAG, "createFragment: 0");
+        Application.getApplication()
+                .bus()
+                .send(new Events.VideoEvent(Events.State.RESUME));
+        Application.getApplication()
+                .bus()
+                .send(new Events.RecordEvent(Events.State.STOP));
+        Log.d(TAG, "onResume: "+binding.videoFrame.getCurrentItem());
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Log.d(TAG, "onPause: "+binding.videoFrame.getCurrentItem());
+        Application.getApplication()
+                .bus()
+                .send(new Events.VideoEvent(Events.State.STOP));
 
     }
 }

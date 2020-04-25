@@ -21,8 +21,10 @@ import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 
+import tech.yashtiwari.firebasevideoapp.Application;
 import tech.yashtiwari.firebasevideoapp.R;
 import tech.yashtiwari.firebasevideoapp.databinding.VideoFragmentBinding;
+import tech.yashtiwari.firebasevideoapp.event.Events;
 import tech.yashtiwari.firebasevideoapp.util.Utility;
 
 
@@ -43,8 +45,26 @@ public class VideoFragment extends Fragment implements Player.EventListener {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
 
+        Log.d(TAG, "onCreateView: ");
         binding = DataBindingUtil.inflate(inflater, R.layout.video_fragment, container, false);
         url = getArguments().getString(Utility.VIDEO_KEY);
+        Application.getApplication().bus().toObservable()
+                .subscribe(o -> {
+                    if (o instanceof Events.VideoEvent) {
+
+                        Events.VideoEvent obj = (Events.VideoEvent) o;
+                        if (obj.getState() == Events.State.STOP){
+                            onPause();
+                        } else {
+                            onResume();
+                        }
+
+                        Log.d(TAG, "initializePlayer: onPause");
+                    }
+                });
+
+
+
         return binding.getRoot();
     }
 
@@ -77,6 +97,8 @@ public class VideoFragment extends Fragment implements Player.EventListener {
         player.prepare(mediaSource, true, true);
         binding.playerView.setUseController(false);
         binding.playerView.setPlayer(player);
+
+
     }
 
     @Override
@@ -94,17 +116,16 @@ public class VideoFragment extends Fragment implements Player.EventListener {
     @Override
     public void onPause() {
         super.onPause();
+        Log.d(TAG, "onPause: ");
         player.setPlayWhenReady(false);
     }
 
     @Override
     public void onStop() {
         super.onStop();
+        Log.d(TAG, "onStop: ");
         player.setPlayWhenReady(false);
     }
 
-    @Override
-    public void onLoadingChanged(boolean isLoading) {
-        Log.d(TAG, "onLoadingChanged: " + isLoading);
-    }
+
 }

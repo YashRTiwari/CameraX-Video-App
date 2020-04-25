@@ -1,5 +1,7 @@
 package tech.yashtiwari.firebasevideoapp.adapter;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
@@ -12,8 +14,8 @@ import tech.yashtiwari.firebasevideoapp.fragment.video.VideoStackFragment;
 
 
 public class MainActivityViewPagerAdapter extends FragmentStateAdapter {
-    VideoStackFragment videoStackFragment;
-    RecordFragment recordFragment;
+
+    private static final String TAG = "MainActivityViewPagerAd";
 
     public MainActivityViewPagerAdapter(@NonNull FragmentActivity fragmentActivity) {
         super(fragmentActivity);
@@ -24,22 +26,24 @@ public class MainActivityViewPagerAdapter extends FragmentStateAdapter {
     public Fragment createFragment(int position) {
 
         if (position == 0) {
-
-            Application.getApplication()
-                    .bus()
-                    .send(new Events.RecordEvent(Events.State.STOP));
-
-            videoStackFragment = new VideoStackFragment();
-            return videoStackFragment;
+            Log.d(TAG, "createFragment: Video");
+            return new VideoStackFragment();
         } else {
-
-            Application.getApplication()
-                    .bus()
-                    .send(new Events.VideoEvent(Events.State.STOP));
-
-            recordFragment = new RecordFragment();
-            return recordFragment;
+            Log.d(TAG, "createFragment: Record");
+            return new RecordFragment();
         }
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+//        Log.d(TAG, "getItemViewType: "+position);
+        return super.getItemViewType(position);
+    }
+
+    @Override
+    public long getItemId(int position) {
+//        Log.d(TAG, "getItemId: " + position);
+        return super.getItemId(position);
     }
 
     @Override

@@ -64,6 +64,8 @@ public class RecordFragment extends Fragment {
     private Snackbar snackbar;
     private VideoCaptureConfig videoCaptureConfig;
     private int CAMERA_FACING_LES;
+    private ProcessCameraProvider cameraProvider = null;
+
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
@@ -86,7 +88,6 @@ public class RecordFragment extends Fragment {
             checkPermissions();
         });
 
-        checkPermissions();
         return binding.getRoot();
     }
 
@@ -102,12 +103,13 @@ public class RecordFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
+        cameraProvider.unbindAll();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-
+        cameraProvider.unbindAll();
     }
     /*
      * Camer
@@ -207,7 +209,6 @@ public class RecordFragment extends Fragment {
         public void run() {
 
             // CameraProvider
-            ProcessCameraProvider cameraProvider = null;
             try {
                 cameraProvider = cameraProviderFuture.get();
             } catch (Exception e) {
@@ -236,7 +237,7 @@ public class RecordFragment extends Fragment {
             try {
                 // A variable number of use-cases can be passed here -
                 // camera provides access to CameraControl & CameraInfo
-                camera = cameraProvider.bindToLifecycle(getViewLifecycleOwner(), cameraSelector, preview, videoCapture);
+                camera = cameraProvider.bindToLifecycle(RecordFragment.this, cameraSelector, preview, videoCapture);
                 // Attach the viewfinder's surface provider to preview use case
                 preview.setSurfaceProvider(binding.textureViewCamera.createSurfaceProvider(camera.getCameraInfo()));
 
@@ -316,7 +317,7 @@ public class RecordFragment extends Fragment {
         @Override
         public void onVideoSaved(@NonNull File file) {
             Log.d(TAG, "onVideoSaved: " + file.getAbsolutePath());
-            uploadFromUri(Uri.fromFile(file));
+//            uploadFromUri(Uri.fromFile(file));
         }
 
         @Override
