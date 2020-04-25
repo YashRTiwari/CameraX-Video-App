@@ -7,11 +7,19 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.ListResult;
 import com.google.firebase.storage.StorageReference;
@@ -30,6 +38,7 @@ public class VideoStackFragment extends Fragment {
 
     private FragmentVideoStackBinding binding;
     private static final String TAG = "VideoStackFragment";
+    private DatabaseReference dbReference, conditionReference;
 
     // Required empty public constructor
     public VideoStackFragment() {
@@ -39,59 +48,58 @@ public class VideoStackFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_video_stack, container, false);
+
+        dbReference = FirebaseDatabase.getInstance().getReference();
+        conditionReference = dbReference.child("videos");        
+        
+        conditionReference.addChildEventListener(new ChildEventListener() {
+
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                Log.d(TAG, "onChildAdded: ");
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                Log.d(TAG, "onChildChanged: ");
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+                Log.d(TAG, "onChildRemoved: ");
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                Log.d(TAG, "onChildMoved: ");
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.d(TAG, "onCancelled: ");
+            }
+        });
+        
         binding.videoFrame.setAdapter(new VideoViewPagerAdapter2(getActivity().getSupportFragmentManager(), getLifecycle()));
         return binding.getRoot();
     }
 
-    private void getAllFilesInFirebase() {
-        FirebaseStorage storage = FirebaseStorage.getInstance();
-        StorageReference listRef = storage.getReference().child("photos/");
-
-        listRef.listAll()
-                .addOnSuccessListener(new OnSuccessListener<ListResult>() {
-                    @Override
-                    public void onSuccess(ListResult listResult) {
-
-                        for (StorageReference item : listResult.getItems()) {
-                            // All the items under listRef.
-                            Task<Uri> task = item.getDownloadUrl();
-
-                            task.addOnSuccessListener(getActivity(), new OnSuccessListener<Uri>() {
-                                @Override
-                                public void onSuccess(Uri uri) {
-                                    Log.d(TAG, uri.toString());
-                                }
-                            });
-
-                        }
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    // Uh-oh, an error occurred!
-                    e.printStackTrace();
-                });
-
-    }
 
     @Override
     public void onResume() {
         super.onResume();
-        Log.d(TAG, "createFragment: 0");
         Application.getApplication()
                 .bus()
                 .send(new Events.VideoEvent(Events.State.RESUME));
         Application.getApplication()
                 .bus()
                 .send(new Events.RecordEvent(Events.State.STOP));
-        Log.d(TAG, "onResume: "+binding.videoFrame.getCurrentItem());
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        Log.d(TAG, "onPause: "+binding.videoFrame.getCurrentItem());
         Application.getApplication()
                 .bus()
                 .send(new Events.VideoEvent(Events.State.STOP));

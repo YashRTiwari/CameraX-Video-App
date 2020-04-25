@@ -22,4 +22,7 @@
     <string name="audio_permission_denied">Audio permission request was denied.</string>
     <string name="audio_permission_required">Audio permission is required video</string>
 
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
 </resources>

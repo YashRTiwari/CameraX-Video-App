@@ -1,12 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="tech.yashtiwari.firebasevideoapp"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="tech.yashtiwari.firebasevideoapp">
 
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
     <uses-feature android:name="android.hardware.camera" />
+
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <application
@@ -18,10 +21,15 @@
         android:supportsRtl="true"
         tools:ignore="LockedOrientationActivity">
 
-        <activity android:name=".activity.MainActivity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen"
+        <activity
+            android:name=".activity.PreviewVideoActivity"
             android:screenOrientation="portrait"
-            >
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen" />
+
+        <activity
+            android:name=".activity.MainActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -32,10 +40,9 @@
         <service
             android:name=".services.MyUploadService"
             android:exported="false" />
-
         <service
             android:name=".services.MyBaseTaskService"
-            android:exported="false"/>
-
+            android:exported="false" />
     </application>
+
 </manifest>

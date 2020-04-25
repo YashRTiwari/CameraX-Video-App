@@ -2,8 +2,6 @@ package tech.yashtiwari.firebasevideoapp.fragment.record;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -30,20 +28,20 @@ import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.io.File;
 
+import tech.yashtiwari.firebasevideoapp.Application;
 import tech.yashtiwari.firebasevideoapp.R;
+import tech.yashtiwari.firebasevideoapp.activity.PreviewVideoActivity;
 import tech.yashtiwari.firebasevideoapp.databinding.RecordFragmentBinding;
-import tech.yashtiwari.firebasevideoapp.services.MyUploadService;
+import tech.yashtiwari.firebasevideoapp.event.Events;
 import tech.yashtiwari.firebasevideoapp.util.Utility;
 
-import static tech.yashtiwari.firebasevideoapp.services.MyUploadService.EXTRA_DOWNLOAD_URL;
-import static tech.yashtiwari.firebasevideoapp.services.MyUploadService.UPLOAD_COMPLETED;
+import static tech.yashtiwari.firebasevideoapp.util.Utility.VIDEO_KEY;
 
 
 public class RecordFragment extends Fragment {
@@ -80,7 +78,7 @@ public class RecordFragment extends Fragment {
         binding = DataBindingUtil.inflate(inflater, R.layout.record_fragment, container, false);
         CAMERA_FACING_LES = CameraSelector.LENS_FACING_FRONT;
         binding.ibRotate.setOnClickListener(v -> {
-            if (CAMERA_FACING_LES == CameraSelector.LENS_FACING_FRONT){
+            if (CAMERA_FACING_LES == CameraSelector.LENS_FACING_FRONT) {
                 CAMERA_FACING_LES = CameraSelector.LENS_FACING_BACK;
             } else {
                 CAMERA_FACING_LES = CameraSelector.LENS_FACING_FRONT;
@@ -92,10 +90,12 @@ public class RecordFragment extends Fragment {
     }
 
 
-
     @Override
     public void onResume() {
         super.onResume();
+        Application.getApplication()
+                .bus()
+                .send(new Events.VideoEvent(Events.State.STOP));
         checkPermissions();
     }
 
@@ -122,7 +122,6 @@ public class RecordFragment extends Fragment {
      */
 
     private void checkPermissions() {
-
         if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA)
                 == PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
@@ -311,13 +310,13 @@ public class RecordFragment extends Fragment {
     }
 
 
-
-
     VideoCapture.OnVideoSavedCallback videoSavedCallback = new VideoCapture.OnVideoSavedCallback() {
         @Override
         public void onVideoSaved(@NonNull File file) {
             Log.d(TAG, "onVideoSaved: " + file.getAbsolutePath());
-//            uploadFromUri(Uri.fromFile(file));
+            Intent showPreview = new Intent(getActivity(), PreviewVideoActivity.class);
+            showPreview.putExtra(VIDEO_KEY, Uri.fromFile(file).toString());
+            startActivity(showPreview);
         }
 
         @Override
@@ -325,14 +324,6 @@ public class RecordFragment extends Fragment {
             cause.printStackTrace();
         }
     };
-
-
-    private void uploadFromUri(Uri fileUri) {
-        Log.d(TAG, "uploadFromUri:src:" + fileUri.toString());
-        getActivity().startService(new Intent(getActivity(), MyUploadService.class)
-                .putExtra(MyUploadService.EXTRA_FILE_URI, fileUri)
-                .setAction(MyUploadService.ACTION_UPLOAD));
-    }
 
 
 }
