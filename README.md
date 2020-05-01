@@ -1,7 +1,7 @@
 # CameraX-Video-App
 
 How this app works?
-[Demo](https://www.google.com)
+[Demo](https://drive.google.com/open?id=1i0xSRlZHW-HF0v3kZgZ4nswYBZTGYeiZ)
 
 1. Application has two ViewPager, one for displaying videos and other for loading VideoStack and Record.
 2. User can swipe right and left to switch between Video List and Camera to record/view vidoes.
