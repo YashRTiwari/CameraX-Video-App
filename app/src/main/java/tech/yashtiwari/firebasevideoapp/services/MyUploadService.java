@@ -85,14 +85,14 @@ public class MyUploadService extends MyBaseTaskService {
 
         Log.d(TAG, "uploadFromUri:dst:" + photoRef.getPath());
         photoRef.putFile(fileUri)
-//                .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-//                    @Override
-//                    public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-//                        showProgressNotification(getString(R.string.progress_uploading),
-//                                taskSnapshot.getBytesTransferred(),
-//                                taskSnapshot.getTotalByteCount());
-//                    }
-//                })
+                .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                        showProgressNotification(getString(R.string.progress_uploading),
+                                taskSnapshot.getBytesTransferred(),
+                                taskSnapshot.getTotalByteCount());
+                    }
+                })
                 .continueWithTask(task -> {
                     // Forward any exceptions
                     if (!task.isSuccessful()) {
@@ -166,7 +166,6 @@ public class MyUploadService extends MyBaseTaskService {
         IntentFilter filter = new IntentFilter();
         filter.addAction(UPLOAD_COMPLETED);
         filter.addAction(UPLOAD_ERROR);
-
         return filter;
     }
 
