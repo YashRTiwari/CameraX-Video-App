@@ -128,7 +128,12 @@ public class VideoFragment extends Fragment implements Player.EventListener {
     private void releasePlayer(){
         if (player != null) {
             player.setPlayWhenReady(false);
-            player.release();
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (player != null) player.release();
     }
 }

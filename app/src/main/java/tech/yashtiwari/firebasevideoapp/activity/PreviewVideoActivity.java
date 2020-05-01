@@ -1,9 +1,5 @@
 package tech.yashtiwari.firebasevideoapp.activity;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.databinding.DataBindingUtil;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -12,9 +8,12 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
-import android.view.View;
 import android.widget.MediaController;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.databinding.DataBindingUtil;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -23,7 +22,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.File;
 
-import io.grpc.okhttp.internal.Util;
 import tech.yashtiwari.firebasevideoapp.R;
 import tech.yashtiwari.firebasevideoapp.databinding.ActivityPreviewVideoBinding;
 import tech.yashtiwari.firebasevideoapp.model.VideoModel;
@@ -90,25 +88,24 @@ public class PreviewVideoActivity extends AppCompatActivity {
     private void deleteFileAndFinish(String videoUrl) {
 
         String[] temp = videoUrl.split("/");
-        String fileName = temp[temp.length  - 1];
+        String fileName = temp[temp.length - 1];
         File dir = getExternalFilesDir(Environment.DIRECTORY_MOVIES);
         if (dir != null && dir.isDirectory()) {
             for (File file : dir.listFiles()) {
-
                 if (file.getName().endsWith(fileName)) {
                     boolean wasDeleted = file.delete();
-                    Log.d(TAG, "deleteFileAndFinish: " + wasDeleted);
+                    Toast.makeText(this, "File not saved", Toast.LENGTH_SHORT).show();
+                    finish();
                     return;
                 }
             }
         }
-        Log.d(TAG, "deleteFileAndFinish: could not find file");
     }
 
     private void uploadFromUri(Uri fileUri) {
-        Log.d(TAG, "uploadFromUri:src:" + fileUri.toString());
         int value = Utility.updateGalleryInfo(this, new File(fileUri.toString()), fileUri);
-        Toast.makeText(this, ""+value, Toast.LENGTH_SHORT).show();
+        if (value != 1) Log.d(TAG, "uploadFromUri: File wasn't updated in Gallery");
+        Toast.makeText(this, "Uploading video...", Toast.LENGTH_SHORT).show();
         startService(new Intent(PreviewVideoActivity.this, MyUploadService.class)
                 .putExtra(MyUploadService.EXTRA_FILE_URI, fileUri)
                 .setAction(MyUploadService.ACTION_UPLOAD));
@@ -123,14 +120,23 @@ public class PreviewVideoActivity extends AppCompatActivity {
 
     private void onUploadResultIntent(Intent intent) {
         Uri mDownloadUrl = intent.getParcelableExtra(MyUploadService.EXTRA_DOWNLOAD_URL);
-        String url = mDownloadUrl.toString();
-        CollectionReference collectionReference = FirebaseFirestore.getInstance().collection("videos");
-        String id = collectionReference.document().getId();
-        VideoModel videoModel = new VideoModel();
-        videoModel.setVideoId(id);
-        videoModel.setVideoLink(url);
-        videoModel.setVideoCreatedOn(System.currentTimeMillis());
-        videoModel.setVideoName(id);
-        collectionReference.document(id).set(videoModel);
+        if (mDownloadUrl != null) {
+            String url = mDownloadUrl.toString();
+            CollectionReference collectionReference = FirebaseFirestore
+                    .getInstance().collection("videos");
+            String id = collectionReference.document().getId();
+            VideoModel videoModel = new VideoModel();
+            videoModel.setVideoId(id);
+            videoModel.setVideoLink(url);
+            videoModel.setVideoCreatedOn(System.currentTimeMillis());
+            videoModel.setVideoName(id);
+            collectionReference.document(id).set(videoModel)
+                    .addOnCompleteListener(
+                            task -> Toast.makeText(PreviewVideoActivity.this,
+                                    "Video Successfully uploaded", Toast.LENGTH_SHORT).show());
+
+        } else {
+            Toast.makeText(this, "Something went wrong...", Toast.LENGTH_SHORT).show();
+        }
     }
 }

@@ -83,6 +83,7 @@ public class RecordFragment extends Fragment {
             } else {
                 CAMERA_FACING_LES = CameraSelector.LENS_FACING_FRONT;
             }
+            if (camera != null) cameraProvider.unbindAll();
             checkPermissions();
         });
 
