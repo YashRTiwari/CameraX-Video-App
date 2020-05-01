@@ -103,13 +103,13 @@ public class RecordFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
-        cameraProvider.unbindAll();
+        if (cameraProvider != null) cameraProvider.unbindAll();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        cameraProvider.unbindAll();
+        if (cameraProvider != null) cameraProvider.unbindAll();
     }
     /*
      * Camer
@@ -147,12 +147,16 @@ public class RecordFragment extends Fragment {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
+
+                    Application.getApplication().bus().send(new Events.ViewPagerSwipe(false));
+
                     File file = Utility.createFile(requireContext(), System.currentTimeMillis() + "");
                     if (videoCapture != null)
                         videoCapture.startRecording(file, Runnable::run, videoSavedCallback);
                     else
                         Toast.makeText(requireContext(), "Video Capture Null", Toast.LENGTH_SHORT).show();
                 } else {
+                    Application.getApplication().bus().send(new Events.ViewPagerSwipe(true));
                     videoCapture.stopRecording();
                 }
             }
@@ -223,6 +227,7 @@ public class RecordFragment extends Fragment {
             videoCaptureConfig = new VideoCaptureConfig.Builder()
                     .setTargetAspectRatio(screenAspectRatio)
                     .setTargetRotation(rotation)
+                    .setTargetResolution(new Size(Math.abs(metrics.widthPixels / 8), (int) Math.abs(metrics.heightPixels / 8)))
                     .setMaxResolution(new Size((int) Math.abs(metrics.widthPixels / 2), (int) Math.abs(metrics.heightPixels / 2)))
                     .getUseCaseConfig();
 

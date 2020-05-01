@@ -6,14 +6,16 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".fragment.video.VideoFragment">
+        tools:context=".fragment.video.VideoFragment"
+        android:background="@android:color/black">
 
         <com.google.android.exoplayer2.ui.PlayerView
             android:id="@+id/player_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:show_buffering="when_playing"
-            app:show_shuffle_button="true" />
+            app:show_shuffle_button="true"
+            />
 
 
     </FrameLayout>

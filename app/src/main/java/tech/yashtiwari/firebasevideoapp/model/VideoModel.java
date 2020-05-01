@@ -8,11 +8,24 @@ public class VideoModel {
     private String videoId;
     private long videoCreatedOn;
 
-    public VideoModel(String id, String url) {
-        this.videoLink = url;
-        this.videoName = id;
-        videoId = id;
-        videoCreatedOn = System.currentTimeMillis();
+    public VideoModel() {
+
+    }
+
+    public void setVideoLink(String videoLink) {
+        this.videoLink = videoLink;
+    }
+
+    public void setVideoName(String videoName) {
+        this.videoName = videoName;
+    }
+
+    public void setVideoId(String videoId) {
+        this.videoId = videoId;
+    }
+
+    public void setVideoCreatedOn(long videoCreatedOn) {
+        this.videoCreatedOn = videoCreatedOn;
     }
 
     public String getVideoLink() {

@@ -17,22 +17,25 @@ import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
-import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
+import com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
+import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
+import com.google.android.exoplayer2.util.Util;
 
 import tech.yashtiwari.firebasevideoapp.Application;
 import tech.yashtiwari.firebasevideoapp.R;
 import tech.yashtiwari.firebasevideoapp.databinding.VideoFragmentBinding;
 import tech.yashtiwari.firebasevideoapp.event.Events;
-import tech.yashtiwari.firebasevideoapp.util.Utility;
+
+import static tech.yashtiwari.firebasevideoapp.util.Utility.VIDEO_KEY;
 
 
 public class VideoFragment extends Fragment implements Player.EventListener {
 
     private VideoViewModel mViewModel;
     private VideoFragmentBinding binding;
-    private String url;
+    private String url = null;
     private static final String TAG = "VideoFragment";
     private SimpleExoPlayer player;
     private boolean playWhenReady = true;
@@ -44,27 +47,20 @@ public class VideoFragment extends Fragment implements Player.EventListener {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-
-        Log.d(TAG, "onCreateView: ");
         binding = DataBindingUtil.inflate(inflater, R.layout.video_fragment, container, false);
-        url = getArguments().getString(Utility.VIDEO_KEY);
+        url = getArguments().getString(VIDEO_KEY);
+//        initializePlayer();
         Application.getApplication().bus().toObservable()
                 .subscribe(o -> {
                     if (o instanceof Events.VideoEvent) {
-
                         Events.VideoEvent obj = (Events.VideoEvent) o;
-                        if (obj.getState() == Events.State.STOP){
+                        if (obj.getState() == Events.State.STOP) {
                             onPause();
                         } else {
                             onResume();
                         }
-
-                        Log.d(TAG, "initializePlayer: onPause");
                     }
                 });
-
-
-
         return binding.getRoot();
     }
 
@@ -73,7 +69,6 @@ public class VideoFragment extends Fragment implements Player.EventListener {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         mViewModel = new ViewModelProvider(this).get(VideoViewModel.class);
-
     }
 
     private MediaSource buildMediaSource(Uri uri) {
@@ -83,7 +78,11 @@ public class VideoFragment extends Fragment implements Player.EventListener {
                 .createMediaSource(uri);
     }
 
+
+
     private void initializePlayer() {
+
+        if (url == null) return;
 
         player = new SimpleExoPlayer.Builder(getActivity().getApplicationContext()).build();
         player.addListener(this);
@@ -92,9 +91,9 @@ public class VideoFragment extends Fragment implements Player.EventListener {
         player.setPlayWhenReady(playWhenReady);
         player.seekTo(0);
         player.setRepeatMode(Player.REPEAT_MODE_ALL);
-        binding.playerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FILL);
+//        binding.playerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FILL);
 //        player.setVideoScalingMode(C.VIDEO_SCALING_MODE_SCALE_TO_FIT);
-        player.prepare(mediaSource, true, true);
+        player.prepare(mediaSource, true, false);
         binding.playerView.setUseController(false);
         binding.playerView.setPlayer(player);
 
@@ -104,28 +103,32 @@ public class VideoFragment extends Fragment implements Player.EventListener {
     @Override
     public void onResume() {
         super.onResume();
-        Log.d(TAG, "onResume: ");
-        if (player == null) {
-            initializePlayer();
+        if (url != null) {
+            if (player == null) {
+                initializePlayer();
+            }
+            player.setPlayWhenReady(true);
+            player.seekTo(0);
         }
-        player.setPlayWhenReady(true);
-        player.seekTo(0);
-
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        Log.d(TAG, "onPause: ");
-        player.setPlayWhenReady(false);
+        if (player != null) player.setPlayWhenReady(false);
     }
 
     @Override
     public void onStop() {
         super.onStop();
         Log.d(TAG, "onStop: ");
-        player.setPlayWhenReady(false);
+        releasePlayer();
     }
 
-
+    private void releasePlayer(){
+        if (player != null) {
+            player.setPlayWhenReady(false);
+            player.release();
+        }
+    }
 }
